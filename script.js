@@ -50,6 +50,51 @@ const classData = [
     joinLink: 'https://frm.tv/join/32RZGH'
   },
   {
+    grade: '8vo A',
+    code: 'TWVA8H',
+    joinLink: 'https://frm.tv/join/TWVA8H'
+  },
+  {
+    grade: '8vo B',
+    code: 'GM8GSK',
+    joinLink: 'https://frm.tv/join/GM8GSK'
+  },
+  {
+    grade: '8vo C',
+    code: 'YRKTVL',
+    joinLink: 'https://frm.tv/join/YRKTVL'
+  },
+  {
+    grade: '9no A',
+    code: 'BR5R4V',
+    joinLink: 'https://frm.tv/join/BR5R4V'
+  },
+  {
+    grade: '9no B',
+    code: 'TQDUAA',
+    joinLink: 'https://frm.tv/join/TQDUAA'
+  },
+  {
+    grade: '10mo A',
+    code: 'XCMQEX',
+    joinLink: 'https://frm.tv/join/XCMQEX'
+  },
+  {
+    grade: '10mo B',
+    code: 'Q68FZQ',
+    joinLink: 'https://frm.tv/join/Q68FZQ'
+  },
+  {
+    grade: '11mo A',
+    code: 'C3GJZC',
+    joinLink: 'https://frm.tv/join/C3GJZC'
+  },
+  {
+    grade: '11mo B',
+    code: 'M9R3LA',
+    joinLink: 'https://frm.tv/join/M9R3LA'
+  },
+  {
     grade: 'Escuelita 4to',
     code: 'JBUY49',
     joinLink: 'https://frm.tv/join/JBUY49'
