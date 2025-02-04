@@ -85,12 +85,12 @@ const classData = [
     joinLink: 'https://frm.tv/join/Q68FZQ'
   },
   {
-    grade: '11vo A',
+    grade: '11mo A',
     code: 'C3GJZC',
     joinLink: 'https://frm.tv/join/C3GJZC'
   },
   {
-    grade: '11vo B',
+    grade: '11mo B',
     code: 'M9R3LA',
     joinLink: 'https://frm.tv/join/M9R3LA'
   },
