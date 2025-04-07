@@ -95,18 +95,6 @@ nav {
   margin-bottom: 1rem;
 }
 
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
 /* Platforms Section */
 .platforms {
   padding: 5rem 5%;
@@ -170,6 +158,19 @@ nav {
   color: #666;
   font-size: 0.9rem;
   line-height: 1.4;
+}
+
+.fa-file-excel {
+  color: #217346;
+}
+
+.fa-file-word {
+  color: #2B579A;
+}
+
+.platform-card:hover .fa-file-excel,
+.platform-card:hover .fa-file-word {
+  color: white;
 }
 
 /* Class Codes Section */
@@ -495,7 +496,76 @@ footer p {
   line-height: 1.5;
 }
 
+/* WhatsApp Float Button */
+.whatsapp-float {
+  position: fixed;
+  width: 60px;
+  height: 60px;
+  bottom: 40px;
+  right: 40px;
+  background-color: #25d366;
+  color: #FFF;
+  border-radius: 50px;
+  text-align: center;
+  font-size: 30px;
+  box-shadow: 2px 2px 3px #999;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.whatsapp-float:hover {
+  background-color: #128C7E;
+  color: #FFF;
+  transform: scale(1.1);
+}
+
+@media screen and (max-width: 767px) {
+  .whatsapp-float {
+    width: 50px;
+    height: 50px;
+    bottom: 20px;
+    right: 20px;
+    font-size: 25px;
+  }
+}
+
 /* Animations */
+.supabase-icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 1rem;
+}
+
+.angry-birds-icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 1rem;
+}
+
+.platform-card:hover .angry-birds-icon {
+  filter: brightness(0) invert(1);
+}
+
+.platform-card:hover .supabase-icon {
+  filter: brightness(0) invert(1);
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
