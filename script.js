@@ -206,6 +206,198 @@ document.addEventListener('DOMContentLoaded', () => {
     classGrid.appendChild(card);
   });
 
+  // Search functionality implementation
+  const searchInput = document.getElementById('siteSearch');
+  const searchButton = document.getElementById('searchButton');
+  
+  /**
+   * Search function to filter content on the page
+   * @param {string} query - The search text entered by user
+   */
+  function performSearch(query) {
+    // Convert query to lowercase for case-insensitive search
+    const searchTerm = query.toLowerCase();
+    
+    // Clear previous search highlights
+    document.querySelectorAll('.highlight').forEach(el => {
+      el.classList.remove('highlight');
+    });
+    
+    // If search is empty, show all elements
+    if (searchTerm === '') {
+      showAllElements();
+      return;
+    }
+    
+    // Arrays to track which elements match
+    const matchingCards = [];
+    const matchingClassCards = [];
+    
+    // Search in platform cards
+    const platformCards = document.querySelectorAll('.platform-card');
+    platformCards.forEach(card => {
+      const cardText = card.textContent.toLowerCase();
+      if (cardText.includes(searchTerm)) {
+        matchingCards.push(card);
+        // Highlight matching text
+        highlightText(card, searchTerm);
+      }
+    });
+    
+    // Search in class cards
+    const classCards = document.querySelectorAll('.class-card');
+    classCards.forEach(card => {
+      const cardText = card.textContent.toLowerCase();
+      if (cardText.includes(searchTerm)) {
+        matchingClassCards.push(card);
+        // Highlight matching text
+        highlightText(card, searchTerm);
+      }
+    });
+    
+    // Hide non-matching platform cards
+    platformCards.forEach(card => {
+      if (!matchingCards.includes(card)) {
+        card.style.display = 'none';
+      } else {
+        card.style.display = '';
+      }
+    });
+    
+    // Hide non-matching class cards
+    classCards.forEach(card => {
+      if (!matchingClassCards.includes(card)) {
+        card.style.display = 'none';
+      } else {
+        card.style.display = '';
+      }
+    });
+    
+    // Show sections with matches, hide others
+    checkSectionVisibility();
+  }
+  
+  /**
+   * Helper function to highlight matching text within an element
+   * @param {Element} element - The DOM element to search within
+   * @param {string} term - The search term to highlight
+   */
+  function highlightText(element, term) {
+    // Get all text nodes within the element
+    const walker = document.createTreeWalker(
+      element,
+      NodeFilter.SHOW_TEXT,
+      null,
+      false
+    );
+    
+    const textNodes = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      textNodes.push(node);
+    }
+    
+    // Process each text node
+    textNodes.forEach(textNode => {
+      const parent = textNode.parentNode;
+      const content = textNode.textContent;
+      const lowerContent = content.toLowerCase();
+      
+      if (lowerContent.includes(term)) {
+        // Split text by the search term
+        const parts = [];
+        let lastIndex = 0;
+        let index;
+        
+        while ((index = lowerContent.indexOf(term, lastIndex)) !== -1) {
+          // Add text before match
+          if (index > lastIndex) {
+            parts.push(document.createTextNode(content.substring(lastIndex, index)));
+          }
+          
+          // Add highlighted match
+          const span = document.createElement('span');
+          span.className = 'highlight';
+          span.textContent = content.substring(index, index + term.length);
+          parts.push(span);
+          
+          lastIndex = index + term.length;
+        }
+        
+        // Add remaining text
+        if (lastIndex < content.length) {
+          parts.push(document.createTextNode(content.substring(lastIndex)));
+        }
+        
+        // Replace original text node with highlighted parts
+        if (parts.length > 0) {
+          const fragment = document.createDocumentFragment();
+          parts.forEach(part => fragment.appendChild(part));
+          parent.replaceChild(fragment, textNode);
+        }
+      }
+    });
+  }
+  
+  /**
+   * Check which sections have visible elements and hide empty sections
+   */
+  function checkSectionVisibility() {
+    // Check platform section
+    const platformGrid = document.querySelector('.platform-grid');
+    const visiblePlatforms = Array.from(platformGrid.querySelectorAll('.platform-card')).filter(
+      card => card.style.display !== 'none'
+    );
+    
+    const platformsSection = document.querySelector('.platforms');
+    platformsSection.style.display = visiblePlatforms.length > 0 ? '' : 'none';
+    
+    // Check class section
+    const classGridEl = document.getElementById('classGrid');
+    const visibleClasses = Array.from(classGridEl.querySelectorAll('.class-card')).filter(
+      card => card.style.display !== 'none'
+    );
+    
+    const classSection = document.querySelector('.class-codes');
+    classSection.style.display = visibleClasses.length > 0 ? '' : 'none';
+  }
+  
+  /**
+   * Reset the page to show all elements
+   */
+  function showAllElements() {
+    // Show all platform cards
+    document.querySelectorAll('.platform-card').forEach(card => {
+      card.style.display = '';
+    });
+    
+    // Show all class cards
+    document.querySelectorAll('.class-card').forEach(card => {
+      card.style.display = '';
+    });
+    
+    // Show all sections
+    document.querySelector('.platforms').style.display = '';
+    document.querySelector('.class-codes').style.display = '';
+  }
+  
+  // Event listener for search button click
+  searchButton.addEventListener('click', () => {
+    performSearch(searchInput.value);
+  });
+  
+  // Event listener for search input (search as you type)
+  searchInput.addEventListener('input', () => {
+    performSearch(searchInput.value);
+  });
+  
+  // Event listener for pressing Enter in search field
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      performSearch(searchInput.value);
+    }
+  });
+
   // Smooth scrolling for navigation links
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
