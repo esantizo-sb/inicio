@@ -190,7 +190,289 @@ const computerClasses = [
   }
 ];
 
+// Sistema de gamificación
+const gamificationSystem = {
+  points: 0,
+  level: 1,
+  badges: [],
+  visitedPlatforms: [],
+  completedChallenges: [],
+  
+  // Inicializar desde localStorage
+  init() {
+    const savedData = localStorage.getItem('gamificationData');
+    if (savedData) {
+      const data = JSON.parse(savedData);
+      this.points = data.points || 0;
+      this.level = data.level || 1;
+      this.badges = data.badges || [];
+      this.visitedPlatforms = data.visitedPlatforms || [];
+      this.completedChallenges = data.completedChallenges || [];
+    }
+    this.updateUI();
+  },
+  
+  // Guardar en localStorage
+  save() {
+    localStorage.setItem('gamificationData', JSON.stringify({
+      points: this.points,
+      level: this.level,
+      badges: this.badges,
+      visitedPlatforms: this.visitedPlatforms,
+      completedChallenges: this.completedChallenges
+    }));
+    this.updateUI();
+  },
+  
+  // Añadir puntos
+  addPoints(amount) {
+    this.points += amount;
+    this.checkLevelUp();
+    this.save();
+    
+    // Mostrar animación de puntos
+    this.showPointsAnimation(amount);
+  },
+  
+  // Comprobar si sube de nivel
+  checkLevelUp() {
+    const nextLevel = Math.floor(this.points / 100) + 1;
+    if (nextLevel > this.level) {
+      this.level = nextLevel;
+      this.showLevelUpAnimation();
+    }
+  },
+  
+  // Añadir insignia
+  addBadge(badge) {
+    if (!this.badges.includes(badge.id)) {
+      this.badges.push(badge.id);
+      this.save();
+      this.showBadgeEarnedAnimation(badge);
+    }
+  },
+  
+  // Registrar visita a plataforma
+  registerPlatformVisit(platformId) {
+    if (!this.visitedPlatforms.includes(platformId)) {
+      this.visitedPlatforms.push(platformId);
+      this.addPoints(10);
+      
+      // Comprobar insignias de explorador
+      if (this.visitedPlatforms.length === 5) {
+        this.addBadge({
+          id: 'explorer-bronze',
+          name: 'Explorador de Bronce',
+          description: 'Has visitado 5 plataformas diferentes',
+          icon: 'fas fa-compass'
+        });
+      } else if (this.visitedPlatforms.length === 10) {
+        this.addBadge({
+          id: 'explorer-silver',
+          name: 'Explorador de Plata',
+          description: 'Has visitado 10 plataformas diferentes',
+          icon: 'fas fa-globe-americas'
+        });
+      } else if (this.visitedPlatforms.length === 15) {
+        this.addBadge({
+          id: 'explorer-gold',
+          name: 'Explorador de Oro',
+          description: 'Has visitado 15 plataformas diferentes',
+          icon: 'fas fa-globe'
+        });
+      }
+      
+      this.save();
+    }
+  },
+  
+  // Completar desafío
+  completeChallenge(challengeId) {
+    if (!this.completedChallenges.includes(challengeId)) {
+      this.completedChallenges.push(challengeId);
+      this.addPoints(25);
+      this.save();
+    }
+  },
+  
+  // Actualizar interfaz de usuario
+  updateUI() {
+    const pointsElement = document.getElementById('user-points');
+    const levelElement = document.getElementById('user-level');
+    const badgesElement = document.getElementById('user-badges');
+    
+    if (pointsElement) pointsElement.textContent = this.points;
+    if (levelElement) levelElement.textContent = this.level;
+    
+    if (badgesElement) {
+      badgesElement.innerHTML = '';
+      this.badges.forEach(badgeId => {
+        const badge = this.getBadgeInfo(badgeId);
+        const badgeElement = document.createElement('div');
+        badgeElement.className = 'badge-item';
+        badgeElement.innerHTML = `
+          <i class="${badge.icon}"></i>
+          <span class="badge-tooltip">${badge.name}: ${badge.description}</span>
+        `;
+        badgesElement.appendChild(badgeElement);
+      });
+    }
+  },
+  
+  // Obtener información de insignia
+  getBadgeInfo(badgeId) {
+    const badgesInfo = {
+      'explorer-bronze': {
+        name: 'Explorador de Bronce',
+        description: 'Has visitado 5 plataformas diferentes',
+        icon: 'fas fa-compass'
+      },
+      'explorer-silver': {
+        name: 'Explorador de Plata',
+        description: 'Has visitado 10 plataformas diferentes',
+        icon: 'fas fa-globe-americas'
+      },
+      'explorer-gold': {
+        name: 'Explorador de Oro',
+        description: 'Has visitado 15 plataformas diferentes',
+        icon: 'fas fa-globe'
+      },
+      'search-master': {
+        name: 'Maestro de Búsqueda',
+        description: 'Has realizado 10 búsquedas en el portal',
+        icon: 'fas fa-search'
+      },
+      'class-joiner': {
+        name: 'Unido a Clases',
+        description: 'Te has unido a 3 clases diferentes',
+        icon: 'fas fa-graduation-cap'
+      },
+      'daily-visitor': {
+        name: 'Visitante Diario',
+        description: 'Has visitado el portal 5 días consecutivos',
+        icon: 'fas fa-calendar-check'
+      }
+    };
+    
+    return badgesInfo[badgeId] || {
+      name: 'Insignia Desconocida',
+      description: 'Descripción no disponible',
+      icon: 'fas fa-question-circle'
+    };
+  },
+  
+  // Animación de puntos ganados
+  showPointsAnimation(points) {
+    const pointsAnimation = document.createElement('div');
+    pointsAnimation.className = 'points-animation';
+    pointsAnimation.textContent = `+${points} puntos`;
+    document.body.appendChild(pointsAnimation);
+    
+    setTimeout(() => {
+      pointsAnimation.classList.add('show');
+      
+      setTimeout(() => {
+        pointsAnimation.classList.remove('show');
+        setTimeout(() => {
+          document.body.removeChild(pointsAnimation);
+        }, 300);
+      }, 1500);
+    }, 10);
+  },
+  
+  // Animación de subida de nivel
+  showLevelUpAnimation() {
+    const levelUpAnimation = document.createElement('div');
+    levelUpAnimation.className = 'level-up-animation';
+    levelUpAnimation.innerHTML = `
+      <div class="level-up-content">
+        <i class="fas fa-arrow-up"></i>
+        <h3>¡Subiste de Nivel!</h3>
+        <p>Ahora eres nivel ${this.level}</p>
+      </div>
+    `;
+    document.body.appendChild(levelUpAnimation);
+    
+    setTimeout(() => {
+      levelUpAnimation.classList.add('show');
+      
+      setTimeout(() => {
+        levelUpAnimation.classList.remove('show');
+        setTimeout(() => {
+          document.body.removeChild(levelUpAnimation);
+        }, 300);
+      }, 3000);
+    }, 10);
+  },
+  
+  // Animación de insignia ganada
+  showBadgeEarnedAnimation(badge) {
+    const badgeAnimation = document.createElement('div');
+    badgeAnimation.className = 'badge-earned-animation';
+    badgeAnimation.innerHTML = `
+      <div class="badge-earned-content">
+        <i class="${badge.icon}"></i>
+        <h3>¡Nueva Insignia!</h3>
+        <h4>${badge.name}</h4>
+        <p>${badge.description}</p>
+      </div>
+    `;
+    document.body.appendChild(badgeAnimation);
+    
+    setTimeout(() => {
+      badgeAnimation.classList.add('show');
+      
+      setTimeout(() => {
+        badgeAnimation.classList.remove('show');
+        setTimeout(() => {
+          document.body.removeChild(badgeAnimation);
+        }, 300);
+      }, 4000);
+    }, 10);
+  }
+};
+
+// Desafíos diarios
+const dailyChallenges = [
+  {
+    id: 'visit-platforms',
+    title: 'Explorador del Día',
+    description: 'Visita 3 plataformas diferentes hoy',
+    reward: 30,
+    progress: 0,
+    target: 3,
+    icon: 'fas fa-compass'
+  },
+  {
+    id: 'join-class',
+    title: 'Únete a una Clase',
+    description: 'Únete a una clase nueva hoy',
+    reward: 25,
+    progress: 0,
+    target: 1,
+    icon: 'fas fa-chalkboard-teacher'
+  },
+  {
+    id: 'search-resources',
+    title: 'Investigador',
+    description: 'Realiza 5 búsquedas diferentes',
+    reward: 20,
+    progress: 0,
+    target: 5,
+    icon: 'fas fa-search'
+  }
+];
+
 document.addEventListener('DOMContentLoaded', () => {
+  // Inicializar sistema de gamificación
+  gamificationSystem.init();
+  
+  // Crear panel de gamificación
+  createGamificationPanel();
+  
+  // Crear panel de desafíos diarios
+  createDailyChallengesPanel();
+  
   const classGrid = document.getElementById('classGrid');
   
   // Populate class cards
@@ -201,14 +483,165 @@ document.addEventListener('DOMContentLoaded', () => {
       <h3>${classInfo.grade}</h3>
       <p>Código de inscripción:</p>
       <div class="code">${classInfo.code}</div>
-      <a href="${classInfo.joinLink}" class="join-link">Unirse a la clase</a>
+      <a href="${classInfo.joinLink}" class="join-link" data-class-id="${classInfo.code}">Unirse a la clase</a>
     `;
     classGrid.appendChild(card);
+    
+    // Añadir evento para registrar unión a clase
+    const joinLink = card.querySelector('.join-link');
+    joinLink.addEventListener('click', function() {
+      const classId = this.getAttribute('data-class-id');
+      // Registrar progreso en desafío
+      updateChallengeProgress('join-class', 1);
+      // Comprobar insignia de unirse a clases
+      checkClassJoinerBadge(classId);
+    });
   });
 
+  // Crear panel de gamificación
+  function createGamificationPanel() {
+    const header = document.querySelector('header');
+    const gamificationPanel = document.createElement('div');
+    gamificationPanel.className = 'gamification-panel';
+    gamificationPanel.innerHTML = `
+      <div class="user-stats">
+        <div class="stat-item">
+          <i class="fas fa-star"></i>
+          <span id="user-points">0</span>
+          <span class="stat-label">Puntos</span>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-trophy"></i>
+          <span id="user-level">1</span>
+          <span class="stat-label">Nivel</span>
+        </div>
+        <div class="stat-item badges-container">
+          <i class="fas fa-medal"></i>
+          <div id="user-badges" class="badges-list"></div>
+          <span class="stat-label">Insignias</span>
+        </div>
+      </div>
+      <button id="challenges-toggle" class="challenges-button">
+        <i class="fas fa-tasks"></i> Desafíos
+      </button>
+    `;
+    
+    document.body.insertBefore(gamificationPanel, header.nextSibling);
+    
+    // Evento para mostrar/ocultar panel de desafíos
+    const challengesToggle = document.getElementById('challenges-toggle');
+    challengesToggle.addEventListener('click', () => {
+      const challengesPanel = document.getElementById('challenges-panel');
+      challengesPanel.classList.toggle('show');
+    });
+  }
+  
+  // Crear panel de desafíos diarios
+  function createDailyChallengesPanel() {
+    const challengesPanel = document.createElement('div');
+    challengesPanel.id = 'challenges-panel';
+    challengesPanel.className = 'challenges-panel';
+    
+    let challengesHTML = `
+      <div class="challenges-header">
+        <h3><i class="fas fa-tasks"></i> Desafíos Diarios</h3>
+        <button id="close-challenges" class="close-button"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="challenges-list">
+    `;
+    
+    dailyChallenges.forEach(challenge => {
+      challengesHTML += `
+        <div class="challenge-item" id="challenge-${challenge.id}">
+          <div class="challenge-icon"><i class="${challenge.icon}"></i></div>
+          <div class="challenge-info">
+            <h4>${challenge.title}</h4>
+            <p>${challenge.description}</p>
+            <div class="challenge-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${(challenge.progress / challenge.target) * 100}%"></div>
+              </div>
+              <div class="progress-text">${challenge.progress}/${challenge.target}</div>
+            </div>
+          </div>
+          <div class="challenge-reward">
+            <span>+${challenge.reward}</span>
+            <i class="fas fa-star"></i>
+          </div>
+        </div>
+      `;
+    });
+    
+    challengesHTML += `
+      </div>
+    `;
+    
+    challengesPanel.innerHTML = challengesHTML;
+    document.body.appendChild(challengesPanel);
+    
+    // Evento para cerrar panel de desafíos
+    const closeButton = document.getElementById('close-challenges');
+    closeButton.addEventListener('click', () => {
+      challengesPanel.classList.remove('show');
+    });
+  }
+  
+  // Actualizar progreso de desafío
+  function updateChallengeProgress(challengeId, amount = 1) {
+    const challenge = dailyChallenges.find(c => c.id === challengeId);
+    if (!challenge) return;
+    
+    challenge.progress = Math.min(challenge.progress + amount, challenge.target);
+    
+    // Actualizar UI
+    const challengeElement = document.getElementById(`challenge-${challengeId}`);
+    if (challengeElement) {
+      const progressFill = challengeElement.querySelector('.progress-fill');
+      const progressText = challengeElement.querySelector('.progress-text');
+      
+      progressFill.style.width = `${(challenge.progress / challenge.target) * 100}%`;
+      progressText.textContent = `${challenge.progress}/${challenge.target}`;
+      
+      // Comprobar si se completó el desafío
+      if (challenge.progress >= challenge.target) {
+        challengeElement.classList.add('completed');
+        // Otorgar recompensa si no se ha completado antes
+        if (!gamificationSystem.completedChallenges.includes(challengeId)) {
+          gamificationSystem.addPoints(challenge.reward);
+          gamificationSystem.completeChallenge(challengeId);
+        }
+      }
+    }
+  }
+  
+  // Comprobar insignia de unirse a clases
+  function checkClassJoinerBadge(classId) {
+    // Añadir puntos por unirse a una clase
+    gamificationSystem.addPoints(15);
+    
+    // Comprobar si ya se ha unido a 3 clases diferentes para otorgar insignia
+    const joinedClasses = JSON.parse(localStorage.getItem('joinedClasses') || '[]');
+    if (!joinedClasses.includes(classId)) {
+      joinedClasses.push(classId);
+      localStorage.setItem('joinedClasses', JSON.stringify(joinedClasses));
+      
+      if (joinedClasses.length === 3) {
+        gamificationSystem.addBadge({
+          id: 'class-joiner',
+          name: 'Unido a Clases',
+          description: 'Te has unido a 3 clases diferentes',
+          icon: 'fas fa-graduation-cap'
+        });
+      }
+    }
+  }
+  
   // Search functionality implementation
   const searchInput = document.getElementById('siteSearch');
   const searchButton = document.getElementById('searchButton');
+  
+  // Contador de búsquedas para insignia
+  let searchCount = parseInt(localStorage.getItem('searchCount') || '0');
   
   /**
    * Search function to filter content on the page
@@ -227,6 +660,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchTerm === '') {
       showAllElements();
       return;
+    }
+    
+    // Incrementar contador de búsquedas y guardar
+    searchCount++;
+    localStorage.setItem('searchCount', searchCount.toString());
+    
+    // Actualizar progreso del desafío de búsqueda
+    updateChallengeProgress('search-resources', 1);
+    
+    // Comprobar insignia de búsqueda
+    if (searchCount === 10) {
+      gamificationSystem.addBadge({
+        id: 'search-master',
+        name: 'Maestro de Búsqueda',
+        description: 'Has realizado 10 búsquedas en el portal',
+        icon: 'fas fa-search'
+      });
     }
     
     // Arrays to track which elements match
@@ -397,6 +847,88 @@ document.addEventListener('DOMContentLoaded', () => {
       performSearch(searchInput.value);
     }
   });
+  
+  // Añadir eventos a las plataformas para registrar visitas
+  document.querySelectorAll('.platform-card a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      // Obtener ID único para la plataforma (usando href como identificador)
+      const platformId = this.getAttribute('href');
+      
+      // Registrar visita a la plataforma
+      gamificationSystem.registerPlatformVisit(platformId);
+      
+      // Actualizar progreso del desafío de visitar plataformas
+      updateChallengeProgress('visit-platforms', 1);
+      
+      // Añadir puntos por visitar plataforma
+      gamificationSystem.addPoints(5);
+    });
+  });
+  
+  // Comprobar si es la primera visita del día
+  const lastVisitDate = localStorage.getItem('lastVisitDate');
+  const today = new Date().toDateString();
+  
+  if (lastVisitDate !== today) {
+    // Es una nueva visita diaria
+    localStorage.setItem('lastVisitDate', today);
+    
+    // Incrementar contador de días consecutivos
+    let consecutiveDays = parseInt(localStorage.getItem('consecutiveDays') || '0');
+    consecutiveDays++;
+    localStorage.setItem('consecutiveDays', consecutiveDays.toString());
+    
+    // Otorgar puntos por visita diaria
+    gamificationSystem.addPoints(10);
+    
+    // Mostrar mensaje de bienvenida
+    setTimeout(() => {
+      const welcomeBack = document.createElement('div');
+      welcomeBack.className = 'welcome-message';
+      welcomeBack.innerHTML = `
+        <div class="welcome-content">
+          <i class="fas fa-calendar-check"></i>
+          <h3>¡Bienvenido de nuevo!</h3>
+          <p>Has visitado el portal ${consecutiveDays} día${consecutiveDays !== 1 ? 's' : ''} consecutivo${consecutiveDays !== 1 ? 's' : ''}.</p>
+          <div class="welcome-reward">+10 <i class="fas fa-star"></i></div>
+        </div>
+      `;
+      document.body.appendChild(welcomeBack);
+      
+      setTimeout(() => {
+        welcomeBack.classList.add('show');
+        
+        setTimeout(() => {
+          welcomeBack.classList.remove('show');
+          setTimeout(() => {
+            document.body.removeChild(welcomeBack);
+          }, 300);
+        }, 3000);
+      }, 10);
+    }, 1000);
+    
+    // Comprobar insignia de visitante diario
+    if (consecutiveDays === 5) {
+      gamificationSystem.addBadge({
+        id: 'daily-visitor',
+        name: 'Visitante Diario',
+        description: 'Has visitado el portal 5 días consecutivos',
+        icon: 'fas fa-calendar-check'
+      });
+    }
+    
+    // Reiniciar desafíos diarios
+    dailyChallenges.forEach(challenge => {
+      challenge.progress = 0;
+    });
+    
+    // Actualizar UI de desafíos
+    setTimeout(() => {
+      dailyChallenges.forEach(challenge => {
+        updateChallengeProgress(challenge.id, 0);
+      });
+    }, 500);
+  }
 
   // Smooth scrolling for navigation links
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
