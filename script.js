@@ -723,6 +723,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
     
+    // Search in computer class cards (Google Classroom)
+    searchComputerClasses(searchTerm);
+    
     // Show sections with matches, hide others
     checkSectionVisibility();
   }
@@ -952,21 +955,71 @@ document.addEventListener('DOMContentLoaded', () => {
     contactForm.reset();
   });
 
-  // Computer classes dropdown
-  const computerSelect = document.getElementById('computerSelect');
-  const goToClassBtn = document.getElementById('goToClassBtn');
+  // Computer classes grid
+  const computerClassesGrid = document.getElementById('computerClassesGrid');
   
+  // Populate computer classes grid
   computerClasses.forEach(classInfo => {
-    const option = document.createElement('option');
-    option.value = classInfo.link;
-    option.textContent = classInfo.grade;
-    computerSelect.appendChild(option);
+    const classCard = document.createElement('div');
+    classCard.className = 'computer-class-card';
+    
+    // Extract class code from the link
+    const codeMatch = classInfo.link.match(/cjc=([a-z0-9]+)/);
+    const classCode = codeMatch ? codeMatch[1] : 'N/A';
+    
+    classCard.innerHTML = `
+      <div class="class-icon">
+        <i class="fas fa-chalkboard"></i>
+      </div>
+      <h3>${classInfo.grade}</h3>
+      <div class="class-code">${classCode}</div>
+      <a href="${classInfo.link}" class="join-class-btn" target="_blank">
+        <i class="fas fa-sign-in-alt"></i> Ir a la clase
+      </a>
+    `;
+    
+    computerClassesGrid.appendChild(classCard);
+    
+    // Add event listener to track visits and award points
+    const joinButton = classCard.querySelector('.join-class-btn');
+    joinButton.addEventListener('click', function() {
+      // Add points for joining a class
+      gamificationSystem.addPoints(15);
+      
+      // Update challenge progress
+      updateChallengeProgress('join-class', 1);
+      
+      // Check for class joiner badge
+      checkClassJoinerBadge();
+    });
   });
-
-  goToClassBtn.addEventListener('click', () => {
-    const selectedValue = computerSelect.value;
-    if (selectedValue) {
-      window.open(selectedValue, '_blank');
+  
+  // Function to search computer classes
+  function searchComputerClasses(query) {
+    const computerClassCards = document.querySelectorAll('.computer-class-card');
+    let visibleCards = 0;
+    
+    computerClassCards.forEach(card => {
+      const cardText = card.textContent.toLowerCase();
+      if (query === '' || cardText.includes(query.toLowerCase())) {
+        card.style.display = '';
+        visibleCards++;
+        
+        // Highlight matching text if there's a query
+        if (query !== '') {
+          highlightText(card, query);
+        }
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    
+    // Show/hide the computer classes section based on search results
+    const computerClassesSection = document.querySelector('.computer-classes');
+    if (computerClassesSection) {
+      computerClassesSection.style.display = visibleCards > 0 ? '' : 'none';
     }
-  });
+    
+    return visibleCards;
+  }
 });
